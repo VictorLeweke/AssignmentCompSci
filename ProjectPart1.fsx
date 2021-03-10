@@ -118,7 +118,7 @@ let rec compute n =
         // We parse the input string
         let e = parse (Console.ReadLine())
         // and print the result of evaluating it
-        printfn "Result: %A" (treeWalker e)
+        printfn "Result: %A" (prettyPrinter e)
         compute n
         with err -> printfn "Error in your code" 
         compute (n-1);;
