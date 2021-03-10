@@ -14,6 +14,9 @@ open ProjectLexer
 //FsLexYacc.10.0.0/build/fslex/net46/fslex.exe ProjectLexer.fsl --unicode
 //FsLexYacc.10.0.0/build/fsyacc/net46/fsyacc.exe ProjectParser.fsp --module ProjectParser
 
+
+
+// We create a string list list, with the purpose of each sublist being its own "level" of a visual tree graph
 let rec treeWalker (e : cmd) : string list list =
     let rec treeWalkerCMD e : string list list  =
         match e with
@@ -56,6 +59,8 @@ let rec treeWalker (e : cmd) : string list list =
         | LessEq(x,y) -> [[" <= "]] @ treeWalkerAri x @  treeWalkerAri y
     treeWalkerCMD e;;
 
+
+// prettyprints GCL into more human-friendly text.
 let rec prettyPrinter e  =
     let rec prettyPrinterCmd c =
         match c with
@@ -98,7 +103,7 @@ let rec prettyPrinter e  =
         | LessEq(x,y) -> prettyPrinterAri(x) + " <= " + prettyPrinterAri(y)
     prettyPrinterCmd e;;
 
-// We
+// A function for generating matching types of AST by parsing input
 let parse input =
     // translate string into a buffer of characters
     let lexbuf = LexBuffer<char>.FromString input
@@ -124,6 +129,7 @@ let rec compute n =
         compute (n-1);;
 
 // Copied from https://stackoverflow.com/questions/2365527/how-read-a-file-into-a-seq-of-lines-in-f/2366649
+// to be used for reading from files instead of command line.
 open System.IO
 let readLines (filePath:string) = seq {
     use sr = new StreamReader (filePath) 
@@ -131,5 +137,5 @@ let readLines (filePath:string) = seq {
         yield sr.ReadLine ()
 }
 
-// Start interacting with the user
+// Start interacting with the user, 3 attempts!
 compute 3
