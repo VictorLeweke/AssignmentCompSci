@@ -1,0 +1,109 @@
+// Open the file that defines the type "expr" we shall use as AST
+%{
+open ProjectTypesAST
+%}
+
+// Declare the tokens (terminal symbols)
+%token <float> NUM
+%token <string> VAR
+%token ASGN THEN IF FI DO OD SKIP IFELSE LBRA RBRA 
+%token TIMES DIV PLUS MINUS POW LPAR RPAR  
+%token TRUE FALSE ANDD ORD ANDS ORS NOTEQ NOT LTEQ GTEQ EQ LT GT 
+%token ARROW EOF
+// NOTE: the actual formats of these tokens are defined in the lexer file
+//       as regular expressions
+
+// Specify precedence and associativity of operators
+// Precedence is given by the order (from low to high)
+%right ASGN
+%left PLUS MINUS ORS ORD
+%left TIMES DIV ANDS ANDD 
+%right POW NOT IFELSE THEN
+//maybe add unary minus plus
+//maybe associativity matters for unary symbols?
+
+
+// We declare the initial non-terminal symbol
+%start start
+
+// We specify the return type of each of then non-terminal symbols
+%type <cmd> start
+%type <cmd> cmd
+%type <gc> gc
+%type <ari> ari
+%type <boolean> boolean
+
+
+// Grammar productions
+%%
+
+// The first production in "formal" notation is
+// start -> expression
+// here written:
+start: cmd EOF               { $1 }
+
+// example:
+// expression EOF             { $1 }
+
+// Note that we need to insert an End-Of-File (EOF)
+// The code annotation { $1 } specifies that parsing with this production
+// returns whatever parsing the expression returns: $1 is the result of parsing
+// the first component of the production (i.e. expression)
+
+// var corresponds to a variable
+
+
+
+// cmd corresponds to command operation 
+cmd:
+  | VAR ASGN ari                  { Assignment($1,$3) }
+  | SKIP                          { Null }
+  | IF gc FI                      { If($2)}
+  | DO gc OD                      { Do($2)}
+  | cmd THEN cmd                  { Then($1,$3)}
+  | VAR LBRA ari RBRA ASGN ari    { ArrayAs($1,$3,$6) }
+
+// gc corresponds to guarded command
+gc:
+  | boolean ARROW cmd             { Arrow($1,$3) }
+  | gc IFELSE gc                  { Ifelse($1,$3) }
+
+
+// ari corresponds to arithmetic operation:
+ari:
+  | ari TIMES ari                 { TimesExpr($1,$3) }
+  | ari DIV ari                   { DivExpr($1,$3) }
+  | ari PLUS ari                  { PlusExpr($1,$3) }
+  | ari MINUS ari                 { MinusExpr($1,$3) }
+  | ari POW ari                   { PowExpr($1,$3) }
+  | PLUS ari                      { UPlusExpr($2) }
+  | MINUS ari                     { UMinusExpr($2) }
+  | NUM                           { Num($1) }
+  | VAR                           { Var($1) }
+  | LPAR ari RPAR                 { $2 }
+  | VAR LBRA ari RBRA             { Array($1,$3) }
+
+// boolean corresponds to boolean operation:
+boolean:
+  | TRUE                          { True }
+  | FALSE                         { False }
+  | boolean ANDS boolean          { Ands($1,$3) }
+  | boolean ORS boolean           { Ors($1,$3) }
+  | boolean ANDD boolean          { Andd($1,$3) }
+  | boolean ORD boolean           { Ord($1,$3) }
+  | NOT boolean                   { Not($2) }
+  | ari EQ ari                    { Equal($1,$3) }
+  | ari NOTEQ ari                 { NotEq($1,$3) }
+  | ari GT ari                    { Greater($1,$3) }
+  | ari GTEQ ari                  { GreaterEq($1,$3) }
+  | ari LT ari                    { Less($1,$3) }
+  | ari LTEQ ari                  { LessEq($1,$3) }
+  | LPAR boolean RPAR             { $2 }
+
+// Again, the code annotation specifies the result of parsing
+// For example { TimesExpr($1,$3) } specifies that parsing with the production
+// returns the value TimesExpr($1,$3), where $i is the result of parsing
+// component i in the production (in this case the lhs and rhs operands)
+
+
+%%
