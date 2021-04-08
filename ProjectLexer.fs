@@ -156,7 +156,7 @@ and tokenize  lexbuf =
           )
   | 2 -> ( 
 # 29 "ProjectLexer.fsl"
-                                 NUM(Double.Parse(LexBuffer<_>.LexemeString lexbuf)) 
+                                 NUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf)) 
 # 160 "ProjectLexer.fs"
           )
   | 3 -> ( 
