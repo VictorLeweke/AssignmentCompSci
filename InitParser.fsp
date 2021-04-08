@@ -1,0 +1,62 @@
+%{
+open InitTypesAST
+%}
+
+// Declare the tokens (terminal symbols)
+%token COMMA
+%token <int> INUM
+%token <string> IVAR
+%token IASGN ILBRA IRBRA 
+%token IMINUS    
+%token EOF
+
+// Precedence is given by the order (from low to high)
+%right IASGN
+%left IMINUS 
+
+// We declare the initial non-terminal symbol
+%start start
+
+// We specify the return type of each of then non-terminal symbols
+%type <vars> start
+%type <vars> vars
+%type <lst> lst
+%type <nums> nums
+
+// Grammar productions
+%%
+
+// The first production in "formal" notation is
+// start -> expression
+// here written:
+start: vars EOF               { $1 }
+
+// Note that we need to insert an End-Of-File (EOF)
+// The code annotation { $1 } specifies that parsing with this production
+// returns whatever parsing the expression returns: $1 is the result of parsing
+// the first component of the production (i.e. expression)
+
+// x = 2, y = 5, z = [1,84,24,12]
+
+// var corresponds to a variable
+
+// Completely change names, especially Array, Num (also AST)
+
+vars:
+  | vars COMMA vars                    { Comma($1,$3) }
+  | IVAR IASGN ILBRA lst IRBRA         { IArray($1,$4) }
+  | IVAR IASGN nums                    { IAssign($1,$3) }
+lst:
+  | nums COMMA lst                  { LstComma($1,$3)}
+  | nums                            { LstNum($1) }
+nums:
+  | IMINUS INUM                     { UMinus($2) }
+  | INUM                            { INum($1)}
+
+// Again, the code annotation specifies the result of parsing
+// For example { TimesExpr($1,$3) } specifies that parsing with the production
+// returns the value TimesExpr($1,$3), where $i is the result of parsing
+// component i in the production (in this case the lhs and rhs operands)
+
+
+%%

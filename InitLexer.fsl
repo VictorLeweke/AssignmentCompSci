@@ -1,10 +1,10 @@
 // The generated lexer module will start with this code
 {
-module ProjectLexer
+module InitLexer
 open FSharp.Text.Lexing
 open System
 // open the module that defines the tokens
-open ProjectParser
+open InitParser
 // Set the language to English such that 4.0 is parsed as 4 and not 40.
 System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.CultureInfo("en-US")
 }
@@ -26,38 +26,12 @@ rule tokenize = parse
 | whitespace    { tokenize lexbuf }
 | newline       { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf; }
 // deal with tokens that need to be built
-| num           { NUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf)) }
-| '*'           { TIMES }
-| '/'           { DIV }
-| '+'           { PLUS }
-| "->"          { ARROW }
-| '-'           { MINUS }
-| '^'           { POW }
-| '('           { LPAR }
-| ')'           { RPAR }
+| num           { INUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf)) }
+| '-'           { IMINUS }
 // new additions
-| ":="          { ASGN }
-| ';'           { THEN }
-| "if"          { IF }
-| "fi"          { FI }
-| "do"          { DO }
-| "od"          { OD }
-| "skip"        { SKIP }
-| "[]"          { IFELSE }
-| '['           { LBRA }
-| ']'           { RBRA }
-| "true"        { TRUE }
-| "false"       { FALSE }
-| var           { VAR(LexBuffer<_>.LexemeString lexbuf) }
-| "&&"          { ANDD }
-| '&'           { ANDS }
-| "||"          { ORD }
-| '|'           { ORS }
-| "!="          { NOTEQ }
-| '!'           { NOT }
-| "<="          { LTEQ }
-| ">="          { GTEQ }
-| '='           { EQ }
-| '<'           { LT }
-| '>'           { GT }
+| "="           { IASGN }
+| ','           { COMMA }
+| '['           { ILBRA }
+| ']'           { IRBRA }
+| var           { IVAR(LexBuffer<_>.LexemeString lexbuf) }
 | eof           { EOF }
